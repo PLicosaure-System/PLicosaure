@@ -3,8 +3,9 @@ package plicosaure.pdf;
 import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import plicosaure.pdf.settings.Border;
 import plicosaure.pdf.settings.Format;
+import plicosaure.pdf.settings.Margins;
 import plicosaure.pdf.structures.Row;
 import plicosaure.pdf.structures.Table;
 import plicosaure.pdf.structures.cell.Cell;
@@ -12,9 +13,6 @@ import plicosaure.pdf.structures.cell.Cell;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import org.apache.pdfbox.multipdf.Overlay;
-
 
 public class Document {
 
@@ -39,7 +37,7 @@ public class Document {
      *
      * @param format The format to use for the document
      */
-    public Document(PDRectangle format){
+    public Document(PDRectangle format) throws IOException {
         document = new PDDocument();
         this.format = format;
         generatePage();
@@ -51,7 +49,7 @@ public class Document {
      *
      * @param format the format to use for the document
      */
-    public Document(Format format){
+    public Document(Format format) throws IOException {
         this(new PDRectangle((float)format.getWidth(), (float)format.getHeight()));
     }
 
@@ -298,7 +296,7 @@ public class Document {
     private void drawCellContent(Cell cell, float x, float y) throws IOException {
         // TODO Handling text alignments
         float yEnd = y - cell.getRow().getHeight() + cell.settings().padding().bottom;
-        cell.draw(this, x+ cell.settings().padding().left, yEnd);
+        cell.draw(this, x+ cell.settings().padding().left, yEnd, 0, 0);
         this.currX = x + cell.getWidth();
     }
 
@@ -357,14 +355,15 @@ public class Document {
         contentStream.showText(text);
         contentStream.endText();
         contentStream.setCharacterSpacing(0);
-    }		
+    }
+
     //endregion
     //region //////////////////////////////////////////// Pages ////////////////////////////////////////////////////////
 
     /**
      * draw the page header
      */
-    protected void header(){}
+    protected void header() throws IOException {}
 
     /**
      * draw the page footer
@@ -381,7 +380,7 @@ public class Document {
      */
     private PDPageContentStream getPageContent() throws IOException {
         if(pageContent == null){
-            pageContent = generateContentStream(curPage);
+            generateContentStream(curPage);
         }
         return pageContent;
     }
@@ -400,11 +399,14 @@ public class Document {
      *
      * @return the new page
      */
-    private PDPage generatePage(){
+    private PDPage generatePage() throws IOException {
+        System.out.println("generate page");
         PDPage page = getNextPage();
         page.setBleedBox(format);
         document.addPage(page);
         curPage = page;
+        this.yStart = this.getUpperY();
+        getPageContent();
         return page;
     }
 
@@ -413,14 +415,12 @@ public class Document {
      *
      * @param page the page
      *
-     * @return the new content stream
      * @throws IOException on error
      */
-    private PDPageContentStream generateContentStream(PDPage page) throws IOException {
-        PDPageContentStream stream = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.OVERWRITE, false);
-        header();
-        footer();
-        return stream;
+    private void generateContentStream(PDPage page) throws IOException {
+        pageContent = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.OVERWRITE, false);
+        this.header();
+        this.footer();
     }
 
     /**
@@ -461,12 +461,12 @@ public class Document {
      * @throws IOException On Error
      */
     public void pageBreak() throws IOException {
+        System.out.println("page break");
         if(pageContent != null){
             pageContent.close();
+            pageContent = null;
         }
         generatePage();
-        this.yStart = this.getUpperY();
-        this.pageContent = generateContentStream(this.curPage);
     }
 
     /**
@@ -618,95 +618,17 @@ public class Document {
 
     //endregion
 
-    //region //////////////////////////////////////////// DRAW IMAGE ////////////////////////////////////////////////////
 
-    /**
-     * Add a image 
-     * 
-     * @param image the image to add
-     * @param x The initial x position
-     * @param y The initial y position
-     * @param width The rectangle width
-     * @param height The rectangle height
-     * 
-     * @return this
-     * @throws IOException on error
-     */
-    public Document drawImage(File image, float x, float y, float width , float height) throws IOException
-    {
-        getPageContent();
-        this.pageContent.drawImage(PDImageXObject.createFromFileByContent(image, document),x,y,width,height);
-        
-        return this;
+    public void draw(Drawable element, float x, float y, float maxX, float maxY) throws IOException {
+        element.draw(this, x, y, maxX, maxY);
     }
-    //endregion
-	
-   
-    
-    //region //////////////////////////////////////////// DRAW Watermark ////////////////////////////////////////////////////
-    /**
-     * draw Watermark in all page 
-     * 
-     * @param Doc_Watermark Path to Watermark
-     * @param Path_Doc_with_Watermark Path to save Doc with Watermark
-     * 
-     * @throws IOException On Error
-     */
-    public void drawWatermark_all_page(String Doc_Watermark, String Path_Doc_with_Watermark) throws IOException
-    {
-        HashMap<Integer, String> overlayProps = new HashMap<Integer, String>();
-        for (int i = 0; i < document.getNumberOfPages(); i++)
-        {
-                overlayProps.put(i + 1, Doc_Watermark);
-        }
 
-        // Using the Overlay object add the map of properties to the PDF
-        Overlay overlay = new Overlay();
-        overlay.setInputPDF(document);
-        overlay.setOverlayPosition(Overlay.Position.BACKGROUND);
-        overlay.overlay(overlayProps);
-
-        // Save the PDF to a new or same location
-        document.save(Path_Doc_with_Watermark);
-    }
-    
-    /**
-     * draw Watermark on the page indicate
-     * 
-     * @param Doc_Watermark Path to Watermark
-     * @param Path_Doc_with_Watermark Path to save Doc with Watermark
-     * @param page_number the page number to draw Watermark
-     * 
-     * @throws IOException On Error
-     */
-    public void drawWatermark_one_page(String Doc_Watermark, String Path_Doc_with_Watermark, int page_number) throws IOException
-    {
-        HashMap<Integer, String> overlayProps = new HashMap<Integer, String>();
-        
-        overlayProps.put(page_number, Doc_Watermark);
-        
-        // Using the Overlay object add the map of properties to the PDF
-        Overlay overlay = new Overlay();
-        overlay.setInputPDF(document);
-        overlay.setOverlayPosition(Overlay.Position.BACKGROUND);
-        overlay.overlay(overlayProps);
-
-        // Save the PDF to a new or same location
-        document.save(Path_Doc_with_Watermark);        
-    }
-    //endregion
-    
-    /**
-     * Save the PDF
-     * 
-     * @param file PDF to save
-     * 
-     * @throws IOException On Error
-     */
     public void save(File file) throws IOException {
         if(pageContent != null){
             pageContent.close();
+            pageContent = null;
         }
         document.save(file);
     }
+
 }

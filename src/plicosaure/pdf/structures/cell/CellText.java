@@ -83,7 +83,8 @@ public class CellText extends Cell {
     }
 
     @Override
-    public void draw(Document doc, float x, float y) throws IOException {
+    public void draw(Document doc, float x, float y, float maxX, float maxY) throws IOException {
+        // TODO taking into account the size of the cell
         doc.drawText(this.text, this.getFont(), this.getFontSize(), this.getTextColor(), x, y);
     }
 

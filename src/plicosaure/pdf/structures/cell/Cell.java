@@ -1,6 +1,6 @@
 package plicosaure.pdf.structures.cell;
 
-import plicosaure.pdf.Document;
+import plicosaure.pdf.Drawable;
 import plicosaure.pdf.settings.CellSettings;
 import plicosaure.pdf.structures.Column;
 import plicosaure.pdf.structures.Row;
@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * Cell class
  */
-public abstract class Cell {
+public abstract class Cell implements Drawable {
 
     //region //////////////////////////////////////////// COLUMN ///////////////////////////////////////////////////////
 
@@ -101,7 +101,6 @@ public abstract class Cell {
     }
 
     //endregion
-    //region //////////////////////////////////////////// ABSTRACT /////////////////////////////////////////////////////
 
     /**
      * Get the height of the cell
@@ -121,16 +120,4 @@ public abstract class Cell {
      */
     public abstract float getWidth() throws IOException;
 
-    /**
-     * Draw the cell
-     *
-     * @param doc The document where to draw the cell
-     * @param x The x coordinate where to draw the cell
-     * @param y The y coordinate where to draw the cell
-     *
-     * @throws IOException on error
-     */
-    public abstract void draw(Document doc, float x, float y) throws IOException;
-
-    //endregion
 }

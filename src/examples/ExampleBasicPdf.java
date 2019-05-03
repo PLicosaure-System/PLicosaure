@@ -2,9 +2,9 @@ package examples;
 
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import plicosaure.pdf.Border;
+import plicosaure.pdf.settings.Border;
 import plicosaure.pdf.Document;
-import plicosaure.pdf.Padding;
+import plicosaure.pdf.settings.Padding;
 import plicosaure.pdf.settings.Format;
 import plicosaure.pdf.structures.Row;
 import plicosaure.pdf.structures.Table;
@@ -19,22 +19,17 @@ public class ExampleBasicPdf {
 
 
     public static void main(String[] args){
-        Document doc = new Document(Format.A4);
-        PDDocumentInformation meta = doc.MetaData();
-        meta.setAuthor("PLICOSAURE Systems");
-        meta.setCreator("PLICOSAURE Systems");
-        meta.setTitle("Basic Example");
+
         try {
+            Document doc = new Document(Format.A4);
+            PDDocumentInformation meta = doc.MetaData();
+            meta.setAuthor("PLICOSAURE Systems");
+            meta.setCreator("PLICOSAURE Systems");
+            meta.setTitle("Basic Example");
             doc.drawText("coucou ca va ?", PDType1Font.HELVETICA, 12, Color.black, 10, doc.getLowerY() -10);
             doc.drawRect(Color.RED, 2,50, 50, 100, 200);
             doc.pageBreak();
             doc.drawLine(Color.blue, 2, 10, 20, 20, 20);
-
-         } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-
             Table tab = new Table();
             Row header = new Row(tab);
             header.addCell(new CellText("intel"));
@@ -57,12 +52,8 @@ public class ExampleBasicPdf {
                 }
             }
             doc.drawTable(tab, 20, doc.getUpperY() - 20);
-                 
-            //doc.drawImage(new File("index.jpg"), 200, 500, 255, 255);
             doc.save(new File("example-table.pdf"));
 
-            doc.drawWatermark_all_page("C:\\Users\\F373804\\Documents\\NetBeansProjects\\PLicosaure\\Watermark.pdf", "example-table_with_watermark.pdf");
-            
         } catch (IOException e) {
             e.printStackTrace();
         }

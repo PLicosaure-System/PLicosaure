@@ -1,7 +1,10 @@
 package plicosaure.pdf.structures;
 
+import plicosaure.pdf.Document;
+import plicosaure.pdf.Drawable;
 import plicosaure.pdf.settings.CellSettings;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,7 +12,7 @@ import java.util.Iterator;
 /**
  * Class representing a Table
  */
-public class Table implements Iterable{
+public class Table implements Iterable, Drawable {
 
     /**
      * Construct an empty table
@@ -234,4 +237,9 @@ public class Table implements Iterable{
         return rows.iterator();
     }
 
+
+    @Override
+    public void draw(Document doc, float x, float y, float maxX, float maxY) throws IOException {
+        doc.drawTable(this, x, y, maxX);
+    }
 }

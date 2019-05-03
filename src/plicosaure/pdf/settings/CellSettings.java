@@ -2,8 +2,6 @@ package plicosaure.pdf.settings;
 
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import plicosaure.pdf.Border;
-import plicosaure.pdf.Padding;
 
 import java.awt.*;
 
