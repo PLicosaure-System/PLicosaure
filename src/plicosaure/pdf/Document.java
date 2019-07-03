@@ -167,6 +167,11 @@ public class Document {
      */
     public void drawTable(Table table, float startX, float startY, float endX)  throws IOException{
         currY = startY;
+        for (Object o : table.getHeader()) {
+            Row headerRow = (Row) o;
+            // We Draw the line keeping the X limits and at the top of the page
+            drawTableLine(table, headerRow, startX, getUpperY(), endX);
+        }
         for(Object o : table){
             currX = startX;
             Row row = (Row) o;
@@ -197,7 +202,7 @@ public class Document {
                 for (Object o : table.getHeader()) {
                     Row headerRow = (Row) o;
                     // We Draw the line keeping the X limits and at the top of the page
-                    drawTableLine(table, headerRow, startX, getUpperY(), endX);
+                    drawTableLine(table, headerRow, currX, getUpperY(), endX);
                 }
                 // after you draw all header rows on next page please keep
                 // removing top borders to avoid double border drawing
